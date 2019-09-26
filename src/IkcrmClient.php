@@ -147,9 +147,7 @@ class IkcrmClient implements IkcrmInterface
         }
 
         return $this->http->get('api/v2/user/list', [
-            'query' => [
-                'page' => $data,
-            ]
+            'query' => $data
         ]);
     }
 
@@ -192,9 +190,7 @@ class IkcrmClient implements IkcrmInterface
         }
 
         return $this->http->get('api/v2/simple_list', [
-            'query' => [
-                'page' => $data,
-            ]
+            'query' => $data
         ]);
     }
 
@@ -281,9 +277,7 @@ class IkcrmClient implements IkcrmInterface
         }
 
         return $this->http->get('api/v2/customers', [
-            'query' => [
-                'page' => $data,
-            ]
+            'query' => $data
         ]);
     }
 
