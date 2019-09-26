@@ -12,6 +12,7 @@ namespace Firstphp\Ikcrm;
 
 use Firstphp\Ikcrm\Bridge\Http;
 use Psr\Container\ContainerInterface;
+use Hyperf\Guzzle\ClientFactory;
 
 class IkcrmClient implements IkcrmInterface
 {
@@ -42,6 +43,10 @@ class IkcrmClient implements IkcrmInterface
      */
     protected $http;
 
+    /**
+     * @var object
+     */
+    protected $clientFactory;
 
     /**
      * @var ContainerInterface
@@ -49,39 +54,42 @@ class IkcrmClient implements IkcrmInterface
     protected $container;
 
 
-    public function __construct(array $config = [], ContainerInterface $container)
+    public function __construct(array $config = [], ContainerInterface $container, ClientFactory $clientFactory)
     {
         $config = $config ? $config : config('ikcrm');
-
         if ($config) {
             $this->url = $config['url'];
             $this->username = $config['ikcrmUsername'];
             $this->password = $config['ikcrmPassword'];
         }
-
+        $this->clientFactory = $clientFactory;
+        $config['token'] = '';
+        $res = $this->login();
+        if (isset($res['code']) && $res['code'] == 0) {
+            $config['token'] = isset($res['data']['user_token']) ? $res['data']['user_token'] : '';
+        }
         $this->http = $container->make(Http::class, compact('config'));
-
     }
 
 
     /**
-     * @param string $login
-     * @param string $password
-     * @param string $corp_id
-     * @param string $device
-     * @param string $version_code
+     * @return mixed
      */
-    public function login(string $login, string $password, string $corp_id = '', string $device = 'open_api', string $version_code = '9.9.9', string $corp_id = '')
+    public function login()
     {
-        return $this->http->login('api/v2/auth/login', [
-            'query' => [
-                'device' => $device,
-                'version_code' => $version_code,
-                'login' => $this->username,
-                'password' => $this->password,
-                'corp_id' => $corp_id
-            ]
-        ]);
+        $arguments = [
+            'device' => 'open_api',
+            'version_code' => '9.9.9',
+            'login' => $this->username,
+            'password' => $this->password
+        ];
+        $options = [
+            'base_uri' => $this->url,
+            'timeout' => 2.0,
+            'verify' => false
+        ];
+        $client = $this->clientFactory->create($options);
+        return json_decode($client->request('post', 'api/v2/auth/login', ['json' => $arguments])->getBody()->getContents(), true);
     }
 
 

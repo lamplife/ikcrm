@@ -17,14 +17,9 @@ interface IkcrmInterface
     /**
      * 用户模块 - 用户登录
      *
-     * @param string $login
-     * @param string $password
-     * @param string $corp_id
-     * @param string $device
-     * @param string $version_code
      * @return mixed
      */
-    public function login(string $login, string $password, string $corp_id = '', string $device = 'open_api', string $version_code = '9.9.9', string $corp_id = '');
+    public function login();
 
 
     /**

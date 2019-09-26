@@ -56,28 +56,19 @@ class Http
     public function __construct(array $config = [], ClientFactory $clientFactory)
     {
         $baseUri = isset($config['url']) && $config['url'] ? $config['url'] : static::BASE_URI;
+        $token = isset($config['token']) && $config['token'] ? $config['token'] : '';
         $this->baseUrl = $baseUri;
         $this->clientFactory = $clientFactory;
         $options = [
-            'Authorization' => "Token token=d4bac2a807ed28542ac5b845306c1fdf,device=open_api,version_code=9.9.9",
-            'Content-Type' => "application/json;charset=utf-8",
             'base_uri' => $baseUri,
             'timeout' => 2.0,
             'verify' => false,
+            'headers' => [
+                'Authorization' => "Token token={$token},device=open_api,version_code=9.9.9",
+                'Content-Type' => "application/json;charset=utf-8",
+            ]
         ];
         $this->client = $clientFactory->create($options);
-    }
-
-
-    public function login(string $method = 'get', string $path = '', array $arguments = [])
-    {
-        $options = [
-            'base_uri' => $this->baseUrl,
-            'timeout' => 2.0,
-            'verify' => false,
-        ];
-        $client = $this->clientFactory->create($options);
-        return $client->request($method, $path, $arguments)->getBody()->getContents();
     }
 
 
@@ -121,14 +112,7 @@ class Http
         }
 
         $response = $this->client->request($name, $arguments[0], $arguments[1])->getBody()->getContents();
-
-        /**
-         * $response = json_decode($this->client->$name($arguments[0], $arguments[1])->getBody()->getContents(), true);
-         * if (isset($response['errcode']) && $response['errcode'] != 0) {
-         * return $response;
-         * }
-         */
-        return $response;
+        return json_decode($response, true);
     }
 
 
